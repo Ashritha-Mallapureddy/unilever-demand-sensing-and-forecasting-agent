@@ -1,65 +1,94 @@
-# Unilever Demand Sensing Agent
+# 🟣 Unilever Demand Sensing Agent
 
-An AI-powered demand sensing dashboard for Unilever FMCG supply chain management. Real-time POS signals and Holt-Winters forecasting replace 30-day batch replenishment, reducing out-of-stock rates by **68.9%** and recovering **£235,619** over 52 weeks.
+An AI-powered demand sensing dashboard built for Unilever FMCG supply chain management. Demonstrates how real-time POS data and Holt-Winters forecasting replace 30-day batch replenishment, reducing Out-of-Stock rates by **68.9%** and recovering **£235,619** in revenue over 52 weeks.
 
-The live dashboard is [https://ashritha-mallapureddy.github.io/unilever-demand-sensing/](https://ashritha-mallapureddy.github.io/unilever-demand-sensing/). It runs entirely in the browser from `index.html`.
+## 🔗 Live Demo
 
-## Features
+**[Open the Live App →](https://ashritha-mallapureddy.github.io/unilever-demand-sensing/)**
+
+> Fully interactive — no installation needed. Runs entirely in the browser.
+
+---
+
+## ✨ Features
 
 | Feature | Description |
 |---|---|
-| AI forecasting | Holt-Winters triple exponential smoothing (α, β, γ grid search, weekly seasonality) |
-| 8 Unilever SKUs | Dove, Hellmann's, Lipton, Domestos, Knorr, Lynx, Surf Excel, Magnum |
-| POS signal input | Promotional, stockout, and seasonal presets |
-| Auto-order log | Replenishment when forecast divergence exceeds 10% |
-| Document upload | Demand plans and POS reports (CSV, XLSX, PDF, DOCX) |
-| Weather impact | Temperature–demand elasticity and a 7-day forecast |
-| Analytics | OOS, bullwhip, forecast accuracy, order log, weather |
+| **AI Forecasting** | Holt-Winters Triple Exponential Smoothing (α, β, γ grid search, m=52 weekly seasonality) |
+| **8 Unilever SKUs** | Dove, Hellmann's, Lipton, Domestos, Knorr, Lynx, Surf Excel, Magnum |
+| **POS Signal Input** | Real-time demand ingestion with promotional, stockout & seasonal presets |
+| **Auto-Order Log** | Exception-triggered replenishment at >10% divergence threshold |
+| **Document Upload** | Upload demand plans, POS reports, retailer forecasts (CSV, XLSX, PDF, DOCX) |
+| **Weather Impact** | Temperature–demand elasticity for FMCG categories + 7-day forecast alerts |
+| **Analytics Tabs** | OOS Analysis · Bullwhip Effect · Forecast Accuracy · Order Log · Weather Impact |
 
-## Key results
+---
 
-| Metric | Push (batch) | AI pull | Improvement |
+## 📊 Key Results
+
+| Metric | Push (Batch) | AI Pull (This Agent) | Improvement |
 |---|---|---|---|
-| OOS rate | 4.85% | 1.51% | −68.9% |
-| Forecast MAPE | 23% | 5.1% | −78% |
-| Response time | 720 hours | 2.7 hours | −99.6% |
-| Safety stock | 38 days | 19 days | −50% |
-| Revenue recovered | — | £235,619 | 73,631 units saved |
+| OOS Rate | 4.85% | 1.51% | **−68.9%** |
+| Forecast MAPE | 23% | 5.1% | **−78%** |
+| Response Time | 720 hours | 2.7 hours | **−99.6%** |
+| Safety Stock | 38 days | 19 days | **−50%** |
+| Revenue Recovered | — | £235,619 | **73,631 units saved** |
 
-## Run locally
+---
 
-```bash
-npm install
-npm run dev
+## 🌦️ Weather–Demand Integration
+
+Weather knowingly and unknowingly affects demand sensing forecasting:
+
+| Category | Driver | Elasticity |
+|---|---|---|
+| Ice Cream / Magnum | Temperature ↑ | +2.8% per °C above 12°C |
+| Hot Beverages / Lipton | Temperature ↑ | −1.9% per °C above 15°C |
+| Soups / Knorr | Cold front ↓ | −2.1% per °C above 10°C |
+
+Weather signals give the agent a **7–14 day anticipatory advantage**, pre-triggering stock before shelves empty.
+
+---
+
+## 📁 Repository Structure
+
+```
+unilever-demand-sensing/
+├── index.html                 # Live interactive dashboard (GitHub Pages)
+├── data/
+│   └── demand_data.csv        # 52-week simulated POS data for 8 SKUs
+├── pipeline/
+│   ├── app.py                 # Streamlit live agent prototype
+│   └── generate_data.py       # Data generation script
+└── README.md
 ```
 
-The dev server listens on `http://127.0.0.1:4178`.
+---
 
-The Streamlit prototype uses the same demand data:
+## 🚀 Run Locally (Streamlit)
 
 ```bash
 pip install streamlit pandas numpy plotly
 streamlit run pipeline/app.py
 ```
 
-`pipeline/generate_data.py` rebuilds `data/demand_data.csv`.
+---
 
-## Repository
+## 📚 Academic References
 
-```
-index.html                      Browser dashboard published to GitHub Pages
-data/demand_data.csv            52-week simulated POS data for 8 SKUs
-pipeline/app.py                 Streamlit prototype
-pipeline/generate_data.py       Data generation script
-```
+- **Lee, Padmanabhan & Whang (1997)** — "The Bullwhip Effect in Supply Chains", *Management Science*, 43(4), 546–558
+- **Holt (1957)** — "Forecasting Seasonals and Trends by Exponentially Weighted Moving Averages"
+- **Winters (1960)** — "Forecasting Sales by Exponentially Weighted Moving Averages", *Management Science*
+- **VICS CPFR (2004)** — Collaborative Planning, Forecasting & Replenishment framework
+- **NielsenIQ (2022)** — "State of Retail Availability"
+- **ECR Europe (2018)** — Out-of-Stock Benchmark Study
 
-## GitHub Pages
+---
 
-GitHub Pages serves this repository from the `main` branch. A push to `main` publishes the dashboard.
+## 🏢 Context
 
-## References
+Built as a demonstration for **Unilever FMCG** supply chain optimization, showing how demand sensing with AI replaces traditional push-based batch forecasting with real-time pull replenishment.
 
-- Lee, Padmanabhan & Whang (1997), "The Bullwhip Effect in Supply Chains", *Management Science*, 43(4), 546–558
-- Holt (1957), "Forecasting Seasonals and Trends by Exponentially Weighted Moving Averages"
-- Winters (1960), "Forecasting Sales by Exponentially Weighted Moving Averages", *Management Science*
-- VICS CPFR (2004); NielsenIQ (2022); ECR Europe (2018)
+---
+
+*Built with Holt-Winters Triple Exponential Smoothing · Pure HTML/CSS/JS · No external dependencies*
