@@ -1,10 +1,10 @@
-# 🟣 Unilever Demand Sensing Agent
+# 🟣 Unilever Demand Sensing and Forecasting Agent
 
 An AI-powered demand sensing dashboard built for Unilever FMCG supply chain management. Demonstrates how real-time POS data and Holt-Winters forecasting replace 30-day batch replenishment, reducing Out-of-Stock rates by **68.9%** and recovering **£235,619** in revenue over 52 weeks.
 
 ## 🔗 Live Demo
 
-**[Open the Live App →](https://ashritha-mallapureddy.github.io/unilever-demand-sensing/)**
+**[Open the Live App →](https://ashritha-mallapureddy.github.io/unilever-demand-sensing-and-forecasting-agent/)**
 
 > Fully interactive — no installation needed. Runs entirely in the browser.
 
@@ -53,7 +53,7 @@ Weather signals give the agent a **7–14 day anticipatory advantage**, pre-trig
 ## 📁 Repository Structure
 
 ```
-unilever-demand-sensing/
+unilever-demand-sensing-and-forecasting-agent/
 ├── index.html                 # Live interactive dashboard (GitHub Pages)
 ├── data/
 │   └── demand_data.csv        # 52-week simulated POS data for 8 SKUs
