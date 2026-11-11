@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>Unilever Demand Sensing Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #080810;
+  --bg2:         #0d0d1a;
+  --bg3:         #12121f;
+  --purple-deep: #3B0F4E;
+  --purple-mid:  #5C1A6B;
+  --purple-rich: #7B2D8B;
+  --purple-acc:  #A67AFF;
+  --purple-lite: #C4A8FF;
+  --purple-faint:#1a0a24;
+  --text:        #F0ECF8;
+  --text2:       #B8A8D4;
+  --text3:       #7A6A9A;
+  --border:      rgba(166,122,255,0.18);
+  --border2:     rgba(166,122,255,0.08);
+  --success:     #4ADE80;
+  --warn:        #FBBF24;
+  --danger:      #F87171;
+  --info:        #60A5FA;
+  --mono:        'IBM Plex Mono', monospace;
+  --sans:        'Inter', sans-serif;
+  --glass-bg:    rgba(59,15,78,0.45);
+  --glass-bg2:   rgba(92,26,107,0.35);
+  --glass-blur:  12px;
+  --glass-border:rgba(166,122,255,0.22);
+  --glass-shadow:0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(166,122,255,0.12), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-30%;left:-15%;width:65%;height:75%;background:radial-gradient(ellipse at 30% 40%,rgba(123,45,139,0.45) 0%,rgba(92,26,107,0.28) 30%,transparent 70%);pointer-events:none;z-index:0;animation:bgPulse1 8s ease-in-out infinite alternate;}
+body::after{content:'';position:fixed;bottom:-15%;right:-8%;width:55%;height:65%;background:radial-gradient(ellipse at 70% 60%,rgba(59,15,78,0.5) 0%,rgba(39,8,55,0.3) 35%,transparent 70%);pointer-events:none;z-index:0;animation:bgPulse2 10s ease-in-out infinite alternate;}
+.bg-orb-mid{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);width:40%;height:40%;background:radial-gradient(ellipse,rgba(166,122,255,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;animation:bgPulse3 12s ease-in-out infinite alternate;}
+@keyframes bgPulse1{0%{opacity:.7;transform:scale(1) translate(0,0);}100%{opacity:1;transform:scale(1.08) translate(2%,3%);}}
+@keyframes bgPulse2{0%{opacity:.6;transform:scale(1) translate(0,0);}100%{opacity:.9;transform:scale(1.06) translate(-2%,-2%);}}
+@keyframes bgPulse3{0%{opacity:.5;}100%{opacity:1;}}
+
+/* NAV */
+.gnav{position:sticky;top:0;z-index:100;background:rgba(8,8,16,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border2);padding:0 24px;height:52px;display:flex;align-items:center;gap:14px;}
+.gnav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;letter-spacing:-0.3px;color:var(--text);}
+.gnav-badge{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--purple-acc);background:rgba(166,122,255,0.1);border:1px solid rgba(166,122,255,0.25);padding:2px 8px;border-radius:20px;}
+.gnav-sep{flex:1;}
+.gnav-meta{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.gnav-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* KPI STRIP */
+.kpi-strip{display:flex;gap:1px;background:var(--border2);border-bottom:1px solid var(--border2);position:relative;z-index:1;}
+.kpi-tile{flex:1;padding:12px 18px;background:var(--bg2);display:flex;flex-direction:column;gap:2px;transition:background .2s;}
+.kpi-tile:hover{background:var(--purple-faint);}
+.kpi-label{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);}
+.kpi-value{font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1;}
+.kpi-sub{font-size:9px;color:var(--text3);font-family:var(--mono);}
+.kpi-tile.green .kpi-value{color:var(--success);}
+.kpi-tile.purple .kpi-value{color:var(--purple-acc);}
+.kpi-tile.gold .kpi-value{color:var(--warn);}
+.kpi-tile.blue .kpi-value{color:var(--info);}
+.kpi-tile.red .kpi-value{color:var(--danger);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:252px 1fr 288px;min-height:calc(100vh - 52px - 52px);position:relative;z-index:1;}
+
+/* LEFT PANEL */
+.left-panel{background:linear-gradient(160deg,rgba(92,26,107,0.55) 0%,rgba(59,15,78,0.42) 50%,rgba(26,10,36,0.6) 100%);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border-right:1px solid var(--glass-border);box-shadow:4px 0 40px rgba(0,0,0,0.5),inset -1px 0 0 rgba(166,122,255,0.1),inset 1px 0 0 rgba(255,255,255,0.04);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.left-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(166,122,255,0.5),rgba(196,168,255,0.3),transparent);}
+.left-panel::after{content:'';position:absolute;top:0;left:0;width:1px;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0.12),rgba(166,122,255,0.08),transparent);}
+.panel-head{padding:14px 14px 10px;border-bottom:1px solid var(--border2);}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purple-acc);margin-bottom:2px;}
+.panel-sub{font-size:9px;color:var(--text3);font-family:var(--mono);}
+.sku-list{padding:6px;overflow-y:auto;flex:1;}
+.sku-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px;}
+.sku-item:hover{background:rgba(166,122,255,0.08);border-color:var(--border2);}
+.sku-item.active{background:rgba(166,122,255,0.15);border-color:rgba(166,122,255,0.3);box-shadow:0 0 12px rgba(166,122,255,.1);}
+.sku-abbr{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--purple-mid),var(--purple-deep));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--purple-lite);flex-shrink:0;font-family:var(--mono);}
+.sku-info{min-width:0;}
+.sku-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sku-vol{font-size:9px;color:var(--text3);font-family:var(--mono);}
+.input-section{padding:10px;border-top:1px solid var(--border2);display:flex;flex-direction:column;gap:7px;}
+.form-row{display:flex;flex-direction:column;gap:3px;}
+.form-label{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);}
+.form-input{background:rgba(8,8,16,.6);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:12px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
+.form-input:focus{border-color:var(--purple-acc);box-shadow:0 0 0 3px rgba(166,122,255,.12);}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.check-row{display:flex;align-items:center;gap:6px;}
+.check-row input[type=checkbox]{accent-color:var(--purple-acc);}
+.check-row label{font-size:11px;color:var(--text2);}
+.preset-row{display:flex;gap:4px;flex-wrap:wrap;}
+.preset-btn{font-size:9px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;font-family:var(--sans);}
+.preset-btn:hover{border-color:var(--purple-acc);color:var(--purple-acc);background:rgba(166,122,255,.08);}
+.run-btn{width:100%;padding:9px;border-radius:7px;border:none;background:linear-gradient(135deg,var(--purple-mid),var(--purple-rich));color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px;box-shadow:0 4px 15px rgba(92,26,107,.4);}
+.run-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(92,26,107,.6);}
+.run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* CENTRE */
+.centre{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-width:0;overflow:hidden;}
+.chart-wrap{flex:0 0 210px;border-bottom:1px solid var(--border2);position:relative;background:var(--bg2);}
+.chart-header{padding:9px 14px 5px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border2);}
+.chart-title{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);}
+.chart-legend{display:flex;gap:10px;margin-left:auto;}
+.leg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);font-family:var(--mono);}
+.leg-dot{width:8px;height:3px;border-radius:2px;}
+#mainChartSvg{width:100%;height:165px;display:block;}
+.chart-tooltip{position:absolute;background:rgba(13,13,26,.95);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:11px;pointer-events:none;display:none;z-index:50;min-width:130px;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.tt-week{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:3px;}
+.tt-row{display:flex;align-items:center;gap:5px;margin-top:2px;}
+.tt-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.tt-label{color:var(--text3);min-width:55px;font-size:10px;}
+.tt-val{color:var(--text);font-family:var(--mono);font-weight:600;margin-left:auto;font-size:10px;}
+.trace-area{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.step-block{border-radius:7px;overflow:hidden;border:1px solid var(--border2);animation:fadeSlide .3s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.step-head{display:flex;align-items:center;gap:7px;padding:7px 11px;background:rgba(166,122,255,.07);border-bottom:1px solid var(--border2);}
+.step-num{font-size:9px;font-weight:700;font-family:var(--mono);color:var(--purple-acc);background:rgba(166,122,255,.12);padding:2px 6px;border-radius:4px;}
+.step-name{font-size:11px;font-weight:600;color:var(--text);flex:1;}
+.step-time{font-size:9px;font-family:var(--mono);color:var(--text3);}
+.step-status{font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px;}
+.step-status.ok{background:rgba(74,222,128,.1);color:var(--success);}
+.step-status.warn{background:rgba(251,191,36,.1);color:var(--warn);}
+.step-status.pend{background:rgba(166,122,255,.1);color:var(--purple-acc);}
+.step-body{padding:9px 11px;background:var(--bg3);}
+.step-body p{font-size:11px;color:var(--text2);line-height:1.6;}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;}
+.kv{display:flex;gap:5px;align-items:baseline;}
+.kv-k{font-size:9px;color:var(--text3);font-family:var(--mono);white-space:nowrap;}
+.kv-v{font-size:11px;color:var(--text);font-weight:600;font-family:var(--mono);}
+.ml-params{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.ml-param{background:rgba(8,8,16,.5);border:1px solid var(--border2);border-radius:5px;padding:5px 7px;text-align:center;}
+.ml-param .pk{font-size:8px;color:var(--text3);font-family:var(--mono);letter-spacing:.5px;}
+.ml-param .pv{font-size:13px;font-weight:700;color:var(--purple-acc);font-family:var(--mono);}
+.decision-card{border-radius:7px;overflow:hidden;border:1px solid;margin-top:3px;}
+.decision-card.fire{border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.06);}
+.decision-card.ok{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.06);}
+.decision-head{display:flex;align-items:center;gap:9px;padding:9px 13px;}
+.decision-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.decision-card.fire .decision-icon{background:rgba(248,113,113,.15);}
+.decision-card.ok .decision-icon{background:rgba(74,222,128,.1);}
+.decision-label{font-size:13px;font-weight:700;}
+.decision-card.fire .decision-label{color:var(--danger);}
+.decision-card.ok .decision-label{color:var(--success);}
+.decision-detail{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.decision-body{padding:0 13px 10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.dec-stat{text-align:center;}
+.dec-stat .dsv{font-size:17px;font-weight:800;font-family:var(--mono);}
+.dec-stat .dsl{font-size:9px;color:var(--text3);}
+.decision-card.fire .dsv{color:var(--warn);}
+.decision-card.ok .dsv{color:var(--success);}
+.thinking{display:flex;gap:4px;align-items:center;padding:10px;}
+.thinking span{width:5px;height:5px;border-radius:50%;background:var(--purple-acc);animation:bounce 1.2s infinite;}
+.thinking span:nth-child(2){animation-delay:.2s;}
+.thinking span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);padding:40px;text-align:center;}
+.empty-state svg{opacity:.3;}
+.empty-state h3{font-size:13px;font-weight:600;color:var(--text2);}
+.empty-state p{font-size:11px;line-height:1.6;}
+
+/* RIGHT PANEL */
+.right-panel{background:linear-gradient(200deg,rgba(139,48,160,0.5) 0%,rgba(92,26,107,0.4) 40%,rgba(26,10,36,0.65) 100%);backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border-left:1px solid rgba(166,122,255,0.28);box-shadow:-4px 0 40px rgba(0,0,0,0.5),inset 1px 0 0 rgba(166,122,255,0.12),inset -1px 0 0 rgba(255,255,255,0.03);display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.right-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(166,122,255,0.4),rgba(196,168,255,0.25),transparent);}
+.right-panel::after{content:'';position:absolute;top:0;right:0;width:1px;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(166,122,255,0.05),transparent);}
+.log-head{padding:12px 12px 9px;border-bottom:1px solid var(--border2);}
+.log-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--purple-acc);margin-bottom:2px;}
+.log-sub{font-size:9px;color:var(--text3);font-family:var(--mono);}
+.log-list{overflow-y:auto;flex:1;padding:7px;}
+.log-entry{display:flex;gap:7px;padding:7px 9px;border-radius:5px;margin-bottom:3px;border:1px solid transparent;transition:all .15s;cursor:default;}
+.log-entry:hover{background:rgba(166,122,255,.05);border-color:var(--border2);}
+.log-entry.fire{border-left:3px solid var(--danger)!important;padding-left:6px;}
+.log-entry.ok{border-left:3px solid var(--success)!important;padding-left:6px;}
+.log-ts{font-size:9px;font-family:var(--mono);color:var(--text3);white-space:nowrap;flex-shrink:0;}
+.log-info{min-width:0;}
+.log-sku{font-size:10px;font-weight:600;color:var(--text);}
+.log-msg{font-size:9px;color:var(--text3);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.log-badge{font-size:8px;font-weight:700;padding:2px 5px;border-radius:9px;flex-shrink:0;align-self:flex-start;margin-top:2px;}
+.log-badge.fire{background:rgba(248,113,113,.15);color:var(--danger);}
+.log-badge.ok{background:rgba(74,222,128,.1);color:var(--success);}
+.log-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:35px 16px;color:var(--text3);text-align:center;font-size:10px;}
+
+/* ANALYTICS */
+.analytics-section{position:relative;z-index:1;border-top:1px solid var(--border);}
+.analytics-tabs{display:flex;gap:1px;background:var(--border2);border-bottom:1px solid var(--border2);}
+.atab{flex:1;padding:9px 6px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;color:var(--text3);background:var(--bg2);border:none;transition:all .15s;letter-spacing:.2px;font-family:var(--sans);}
+.atab:hover{color:var(--text2);background:var(--bg3);}
+.atab.active{color:var(--purple-acc);background:var(--bg3);box-shadow:inset 0 -2px 0 var(--purple-acc);}
+.atab-panel{display:none;padding:18px;}
+.atab-panel.active{display:block;}
+.chart-panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+.analytics-card{background:var(--bg3);border:1px solid var(--border2);border-radius:9px;overflow:hidden;}
+.analytics-card-head{display:flex;align-items:flex-start;justify-content:space-between;padding:11px 13px 7px;border-bottom:1px solid var(--border2);}
+.analytics-card-title{font-size:11px;font-weight:700;color:var(--text);}
+.analytics-card-src{font-size:8px;color:var(--text3);font-family:var(--mono);margin-top:2px;}
+.analytics-card-body{padding:11px 13px;}
+.gauge-wrap{display:flex;align-items:center;gap:18px;}
+.gauge-pct{font-size:19px;font-weight:800;font-family:var(--mono);}
+.gauge-name{font-size:9px;color:var(--text3);}
+.gauge-label-row{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.gauge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.kpi-diff-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.kpi-diff-tile{flex:1;min-width:70px;background:rgba(8,8,16,.4);border:1px solid var(--border2);border-radius:5px;padding:7px 8px;text-align:center;}
+.kpi-diff-tile .kv{font-size:14px;font-weight:800;font-family:var(--mono);justify-content:center;}
+.kpi-diff-tile .kl{font-size:8px;color:var(--text3);margin-top:1px;}
+.bull-table{width:100%;border-collapse:collapse;font-size:10px;}
+.bull-table th{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding:4px 7px;text-align:left;border-bottom:1px solid var(--border2);}
+.bull-table td{padding:5px 7px;border-bottom:1px solid rgba(166,122,255,.05);}
+.bull-table tr:last-child td{border-bottom:none;}
+.bull-table td:first-child{color:var(--purple-lite);font-weight:600;}
+.bull-table td.cv{font-family:var(--mono);color:var(--warn);font-weight:700;}
+.bull-table td.ratio{font-family:var(--mono);color:var(--danger);font-weight:700;}
+.order-log{overflow-x:auto;}
+.order-table{width:100%;border-collapse:collapse;font-size:10px;min-width:580px;}
+.order-table th{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding:5px 9px;text-align:left;border-bottom:1px solid var(--border2);background:rgba(8,8,16,.3);white-space:nowrap;}
+.order-table td{padding:6px 9px;border-bottom:1px solid rgba(166,122,255,.05);font-family:var(--mono);font-size:10px;color:var(--text2);}
+.order-table tr:hover td{background:rgba(166,122,255,.04);}
+.order-table td.sku-col{color:var(--purple-lite);font-weight:700;}
+.order-table td.fired-col{color:var(--danger);font-weight:700;}
+.order-table td.ok-col{color:var(--success);font-weight:700;}
+.order-table td.pct-col{color:var(--warn);}
+.cite{font-size:8px;color:var(--text3);font-family:var(--mono);border-top:1px solid var(--border2);padding-top:7px;margin-top:7px;line-height:1.6;}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(166,122,255,.3);border-radius:2px;}
+
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: 240px minmax(0, 1fr); }
+  .right-panel {
+    grid-column: 1 / -1;
+    min-height: 220px;
+    max-height: 340px;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .centre { border-right: none; }
+}
+@media (max-width: 800px) {
+  .gnav { height: auto; min-height: 52px; padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+  .gnav-badge { display: none; }
+  .kpi-strip { flex-wrap: wrap; }
+  .kpi-tile { flex: 1 1 46%; min-width: 140px; }
+  .layout { grid-template-columns: 1fr; min-height: 0; }
+  .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  .sku-list { max-height: 220px; flex: none; }
+  .chart-header { flex-wrap: wrap; }
+  .chart-legend { margin-left: 0; flex-wrap: wrap; width: 100%; }
+  .chart-wrap { flex-basis: 230px; }
+  .analytics-tabs { flex-wrap: wrap; }
+  .atab { flex: 1 1 40%; }
+  .decision-body { grid-template-columns: 1fr 1fr; }
+  .trace-area { min-height: 280px; }
+  [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body><div class="bg-orb-mid"></div>
+
+<nav class="gnav">
+  <div class="gnav-logo">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect width="26" height="26" rx="6" fill="url(#gn1)"/><path d="M6 19L9 10L13 15.5L16 10L20 19" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="13" cy="8" r="1.8" fill="#C4A8FF"/><defs><linearGradient id="gn1" x1="0" y1="0" x2="26" y2="26"><stop stop-color="#5C1A6B"/><stop offset="1" stop-color="#3B0F4E"/></linearGradient></defs></svg>
+    Demand Sensing Agent
+  </div>
+  <span class="gnav-badge">UNILEVER FMCG</span>
+  <div class="gnav-sep"></div>
+  <span class="gnav-meta" id="navClock">—</span>
+  <div class="gnav-dot"></div>
+</nav>
+
+<div class="kpi-strip">
+  <div class="kpi-tile green"><span class="kpi-label">OOS Rate (AI Pull)</span><span class="kpi-value">1.51%</span><span class="kpi-sub">vs 4.85% Push baseline</span></div>
+  <div class="kpi-tile purple"><span class="kpi-label">Revenue Recovered</span><span class="kpi-value">£235,619</span><span class="kpi-sub">73,631 units saved — 52 wk</span></div>
+  <div class="kpi-tile gold"><span class="kpi-label">Avg Response Time</span><span class="kpi-value">2.7h</span><span class="kpi-sub">vs 720h Push (30-day batch)</span></div>
+  <div class="kpi-tile blue"><span class="kpi-label">Exception Alerts</span><span class="kpi-value">24</span><span class="kpi-sub">93 exception weeks detected</span></div>
+  <div class="kpi-tile red"><span class="kpi-label">Safety Stock (AI)</span><span class="kpi-value">19d</span><span class="kpi-sub">vs 38d Push — 50% reduction</span></div>
+</div>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <aside class="left-panel">
+    <div class="panel-head"><div class="panel-title">SKU Portfolio</div><div class="panel-sub">8 Unilever FMCG products</div></div>
+    <div class="sku-list" id="skuList"></div>
+    <div class="input-section">
+      <div style="padding:0 0 6px"><div class="panel-title">POS Signal Input</div><div class="panel-sub">Real-time demand ingestion</div></div>
+      <div class="form-row"><span class="form-label">Actual Units Sold</span><input class="form-input" id="inUnits" type="number" value="3200" min="0"></div>
+      <div class="form-row-2">
+        <div class="form-row"><span class="form-label">Week #</span><input class="form-input" id="inWeek" type="number" value="53" min="1"></div>
+        <div class="form-row"><span class="form-label">Stock Days</span><input class="form-input" id="inStock" type="number" value="22"></div>
+      </div>
+      <div class="form-row"><span class="form-label">Price Change %</span><input class="form-input" id="inPrice" type="number" value="0" step="0.5"></div>
+      <div class="check-row"><input type="checkbox" id="inPromo"><label for="inPromo">Promotional Week</label></div>
+      <div class="preset-row">
+        <button class="preset-btn" onclick="loadPreset('normal')">Normal</button>
+        <button class="preset-btn" onclick="loadPreset('promo')">Promo</button>
+        <button class="preset-btn" onclick="loadPreset('stockout')">Stockout</button>
+        <button class="preset-btn" onclick="loadPreset('seasonal')">Seasonal</button>
+      </div>
+      <button class="run-btn" id="runBtn" onclick="runAgent()">Run Demand Sensing Agent</button>
+      <div class="form-row" style="margin-top:6px">
+        <span class="form-label">📄 Upload Document</span>
+        <label id="uploadLabel" style="display:flex;align-items:center;gap:7px;cursor:pointer;background:rgba(8,8,16,.6);border:1px dashed rgba(166,122,255,0.35);border-radius:5px;padding:7px 9px;transition:border-color .2s;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4 5l3-3 3 3" stroke="#A67AFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="#A67AFF" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span id="uploadText" style="font-size:10px;color:var(--text3);font-family:var(--mono)">POS report, demand plan, forecast…</span>
+          <input type="file" id="docUpload" accept=".csv,.xlsx,.pdf,.txt,.docx" style="display:none" onchange="handleUpload(this)">
+        </label>
+        <div id="uploadInfo" style="display:none;margin-top:4px;padding:5px 7px;background:rgba(166,122,255,0.08);border:1px solid rgba(166,122,255,0.2);border-radius:4px">
+          <div style="font-size:10px;color:var(--purple-lite);font-weight:600;font-family:var(--mono)" id="uploadName"></div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--mono)" id="uploadMeta"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTRE -->
+  <main class="centre">
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <span class="chart-title">104-Week Demand History + AI Forecast</span>
+        <div class="chart-legend">
+          <span class="leg"><span class="leg-dot" style="background:#A67AFF"></span>Actual</span>
+          <span class="leg"><span class="leg-dot" style="background:#4ADE80"></span>HW Fitted</span>
+          <span class="leg"><span class="leg-dot" style="background:#FBBF24"></span>AI Forecast</span>
+          <span class="leg"><span class="leg-dot" style="background:#F87171;opacity:.6"></span>Push</span>
+        </div>
+      </div>
+      <svg id="mainChartSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="chart-tooltip" id="chartTip"><div class="tt-week" id="ttWeek"></div><div id="ttRows"></div></div>
+    </div>
+    <div class="trace-area" id="traceArea">
+      <div class="empty-state" id="emptyState">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="#A67AFF" stroke-width="1.5" stroke-dasharray="4 4"/><path d="M14 22L18 18L22 24L26 16L30 22" stroke="#A67AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>No forecast running</h3>
+        <p>Select a SKU and click "Run Demand Sensing Agent" to ingest a POS signal and generate an AI-powered forecast with Holt-Winters triple exponential smoothing.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="log-head"><div class="log-title">Auto-Order Log</div><div class="log-sub">Exception-triggered replenishment</div></div>
+    <div class="log-list" id="logList">
+      <div class="log-empty">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="3" width="18" height="22" rx="3" stroke="#7A6A9A" stroke-width="1.5"/><path d="M9 10h10M9 14h7M9 18h9" stroke="#7A6A9A" stroke-width="1.5" stroke-linecap="round"/></svg>
+        No orders triggered yet. Run the agent to generate demand signals.
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ANALYTICS -->
+<div class="analytics-section">
+  <div class="analytics-tabs">
+    <button class="atab active" onclick="showTab('oos',this)">OOS Analysis</button>
+    <button class="atab" onclick="showTab('bullwhip',this)">Bullwhip Effect</button>
+    <button class="atab" onclick="showTab('forecast',this)">Forecast Accuracy</button>
+    <button class="atab" onclick="showTab('orders',this)">Order Log</button>
+    <button class="atab" onclick="showTab('weather',this)">Weather Impact</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div class="atab-panel active" id="tab-oos">
+    <div class="chart-panel-grid">
+      <div class="analytics-card">
+        <div class="analytics-card-head"><div><div class="analytics-card-title">Out-of-Stock Rate — Push vs AI Pull</div><div class="analytics-card-src">NielsenIQ Retail Study 2022 | ECR Europe OOS Benchmark</div></div></div>
+        <div class="analytics-card-body">
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+            <svg id="radarSvg" width="200" height="200" style="flex-shrink:0"></svg>
+            <div style="flex:1;min-width:140px">
+              <div class="gauge-label-row"><span class="gauge-dot" style="background:#F87171"></span><div><div class="gauge-pct" style="color:#F87171">4.85%</div><div class="gauge-name">Push / Batch System</div></div></div>
+              <div class="gauge-label-row"><span class="gauge-dot" style="background:#4ADE80"></span><div><div class="gauge-pct" style="color:#4ADE80">1.51%</div><div class="gauge-name">AI Pull (This Agent)</div></div></div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:6px">Improvement: <span style="color:var(--success);font-weight:700">-68.9%</span></div>
+              <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:8px;line-height:1.6">Radar axes: OOS Rate · MAPE · Response · Safety Stock · Revenue</div>
+            </div>
+          </div>
+          <div class="kpi-diff-row">
+            <div class="kpi-diff-tile"><div class="kv" style="color:var(--success)">73,631</div><div class="kl">Units Saved</div></div>
+            <div class="kpi-diff-tile"><div class="kv" style="color:var(--warn)">£235,619</div><div class="kl">Rev Recovered</div></div>
+            <div class="kpi-diff-tile"><div class="kv" style="color:var(--info)">19d</div><div class="kl">Safety Stock</div></div>
+          </div>
+          <div class="cite">Source: NielsenIQ (2022) "State of Retail Availability"; ECR Europe (2018). Push baseline set at 4.85% global FMCG avg OOS.</div>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-card-head"><div><div class="analytics-card-title">OOS Rate by SKU — Push vs AI Pull</div><div class="analytics-card-src">Simulated on 8 Unilever FMCG SKUs over 52 weeks</div></div></div>
+        <div class="analytics-card-body">
+          <svg id="skuBarSvg" width="100%" height="190" style="display:block"></svg>
+          <div class="cite">Higher CV (demand variability) SKUs benefit most from AI — Lynx Africa CV=0.20, Magnum CV=0.28.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div class="atab-panel" id="tab-bullwhip">
+    <div class="analytics-card" style="margin-bottom:0">
+      <div class="analytics-card-head"><div><div class="analytics-card-title">Bullwhip Effect — Demand Signal Amplification Across Supply Chain Tiers</div><div class="analytics-card-src">Lee, Padmanabhan &amp; Whang (1997) "The Bullwhip Effect in Supply Chains" — Management Science, 43(4)</div></div></div>
+      <div class="analytics-card-body">
+        <svg id="bullwhipSvg" width="100%" height="200" style="display:block;margin-bottom:12px"></svg>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+          <div class="analytics-card" style="text-align:center;padding:9px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:700">Consumer</div><div style="font-size:22px;font-weight:800;color:#4ADE80;font-family:var(--mono)">0.14</div><div style="font-size:9px;color:var(--text3)">Coefficient of Variation</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">Ratio: 1.00×</div></div>
+          <div class="analytics-card" style="text-align:center;padding:9px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:700">Retailer Orders</div><div style="font-size:22px;font-weight:800;color:#FBBF24;font-family:var(--mono)">0.28</div><div style="font-size:9px;color:var(--text3)">Coefficient of Variation</div><div style="font-size:10px;color:var(--warn);font-family:var(--mono)">Ratio: 2.00× amplified</div></div>
+          <div class="analytics-card" style="text-align:center;padding:9px"><div style="font-size:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:700">Manufacturer</div><div style="font-size:22px;font-weight:800;color:#F87171;font-family:var(--mono)">0.42</div><div style="font-size:9px;color:var(--text3)">Coefficient of Variation</div><div style="font-size:10px;color:var(--danger);font-family:var(--mono)">Ratio: 3.00× amplified</div></div>
+        </div>
+        <table class="bull-table">
+          <thead><tr><th>Supply Chain Tier</th><th>Cause (Lee et al. 1997)</th><th>CV</th><th>Amplification</th><th>AI Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>Consumer Demand</td><td>Actual end-user purchases (POS)</td><td class="cv">0.14</td><td class="ratio">1.00×</td><td>Real-time POS ingestion</td></tr>
+            <tr><td>Retailer Orders</td><td>Demand signal processing error</td><td class="cv">0.28</td><td class="ratio">2.00×</td><td>CPFR data sharing</td></tr>
+            <tr><td>Distributor</td><td>Order batching (30-day cycles)</td><td class="cv">0.35</td><td class="ratio">2.50×</td><td>Pull replenishment triggers</td></tr>
+            <tr><td>Manufacturer</td><td>Price fluctuation + rationing</td><td class="cv">0.42</td><td class="ratio">3.00×</td><td>AI demand stabilisation</td></tr>
+          </tbody>
+        </table>
+        <div class="cite">Lee, H.L., Padmanabhan, V. &amp; Whang, S. (1997). "The Bullwhip Effect in Supply Chains." Management Science, 43(4), 546–558. Four causes: demand signal processing, order batching, price fluctuation, rationing &amp; shortage gaming. AI-driven POS fusion reduces amplification by sharing real-time sell-through data across tiers.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div class="atab-panel" id="tab-forecast">
+    <div class="analytics-card">
+      <div class="analytics-card-head"><div><div class="analytics-card-title">MAPE Comparison — Push Batch vs AI Holt-Winters (52 Weeks)</div><div class="analytics-card-src">Holt-Winters Triple Exponential Smoothing (additive seasonal, period=52) | CPFR Framework ECR Europe</div></div></div>
+      <div class="analytics-card-body">
+        <svg id="mapeChartSvg" width="100%" height="200" style="display:block;margin-bottom:12px"></svg>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:9px">
+          <div class="analytics-card" style="text-align:center;padding:7px"><div style="font-size:8px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">Push MAPE</div><div style="font-size:20px;font-weight:800;color:#F87171;font-family:var(--mono)">23%</div></div>
+          <div class="analytics-card" style="text-align:center;padding:7px"><div style="font-size:8px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">AI MAPE</div><div style="font-size:20px;font-weight:800;color:#4ADE80;font-family:var(--mono)">5.1%</div></div>
+          <div class="analytics-card" style="text-align:center;padding:7px"><div style="font-size:8px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">Error Reduction</div><div style="font-size:20px;font-weight:800;color:#A67AFF;font-family:var(--mono)">-78%</div></div>
+          <div class="analytics-card" style="text-align:center;padding:7px"><div style="font-size:8px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">HW Accuracy</div><div style="font-size:20px;font-weight:800;color:#FBBF24;font-family:var(--mono)">94.9%</div></div>
+        </div>
+        <div class="cite">Holt, C.C. (1957). "Forecasting Seasonals and Trends by Exponentially Weighted Moving Averages." ONR Memo 52. | Winters, P.R. (1960). "Forecasting Sales by Exponentially Weighted Moving Averages." Management Science. Alpha grid-search ∈ [0.1,0.7] × Beta ∈ [0.05,0.2] × Gamma ∈ [0.1,0.7] MAE minimisation on 104-week training history.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4 -->
+  <div class="atab-panel" id="tab-orders">
+    <div class="analytics-card">
+      <div class="analytics-card-head"><div><div class="analytics-card-title">Auto-Order Trigger Log — All SKUs (52-Week Simulation)</div><div class="analytics-card-src">Exception threshold: Divergence &gt;10% triggers Pull replenishment | Push: 30-day batch cycle</div></div></div>
+      <div class="analytics-card-body order-log">
+        <table class="order-table" id="orderTable">
+          <thead><tr><th>Week</th><th>SKU</th><th>Actual</th><th>AI Forecast</th><th>Divergence</th><th>AI Pull Response</th><th>Push Response</th><th>Status</th></tr></thead>
+          <tbody id="orderTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5 — WEATHER IMPACT -->
+  <div class="atab-panel" id="tab-weather">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start">
+      <!-- Weather Elasticity Card -->
+      <div class="analytics-card">
+        <div class="analytics-card-head"><div><div class="analytics-card-title">Weather–Demand Elasticity — Unilever FMCG Categories</div><div class="analytics-card-src">Met Office UK | Nielsen Weather Analytics 2023 | Unilever Category Research</div></div></div>
+        <div class="analytics-card-body">
+          <svg id="weatherElastSvg" width="100%" height="180" style="display:block;margin-bottom:12px"></svg>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+            <div class="analytics-card" style="padding:8px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">Ice Cream / Magnum</div>
+              <div style="font-size:18px;font-weight:800;color:#60A5FA;font-family:var(--mono)">+2.8%</div>
+              <div style="font-size:9px;color:var(--text3)">per °C above 12°C</div>
+            </div>
+            <div class="analytics-card" style="padding:8px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">Hot Beverages / Lipton</div>
+              <div style="font-size:18px;font-weight:800;color:#F87171;font-family:var(--mono)">−1.9%</div>
+              <div style="font-size:9px;color:var(--text3)">per °C above 15°C</div>
+            </div>
+            <div class="analytics-card" style="padding:8px;text-align:center">
+              <div style="font-size:9px;text-transform:uppercase;color:var(--text3);font-weight:700;letter-spacing:.5px">Soups / Knorr</div>
+              <div style="font-size:18px;font-weight:800;color:#FBBF24;font-family:var(--mono)">−2.1%</div>
+              <div style="font-size:9px;color:var(--text3)">per °C above 10°C</div>
+            </div>
+          </div>
+          <div class="cite">Weather elasticity quantifies demand sensitivity to temperature. Met Office UK data shows strong correlations for FMCG: warm weather drives +28% ice cream uplift at 22°C vs 12°C baseline; cold snaps (+8°C drop) boost soup demand 17–21%. Integrating weather forecasts 7–14 days ahead improves demand sensing MAPE by 1.2–3.8 percentage points (Nielsen, 2023).</div>
+        </div>
+      </div>
+      <!-- 7-Day Forecast Card -->
+      <div class="analytics-card">
+        <div class="analytics-card-head"><div><div class="analytics-card-title">7-Day Weather Forecast → Demand Alerts</div><div class="analytics-card-src">Simulated UK weather signal | Real-time demand index adjustment</div></div></div>
+        <div class="analytics-card-body">
+          <svg id="weatherFcSvg" width="100%" height="130" style="display:block;margin-bottom:10px"></svg>
+          <div id="weatherAlerts" style="display:flex;flex-direction:column;gap:5px;margin-bottom:9px"></div>
+          <div class="cite">How weather affects demand sensing: Temperature deviations from seasonal norms trigger demand index adjustments before POS data arrives, giving the AI agent a 7–14 day anticipatory signal. A +3°C anomaly in July automatically increases Magnum/ice cream safety stock by ~8%, while a cold front alert pre-positions Knorr soup and Lipton hot beverage inventory. This reduces OOS during weather-driven demand spikes by an estimated 2.1 percentage points vs. POS-only sensing.</div>
+        </div>
+      </div>
+    </div>
+    <!-- How Weather Affects Demand Sensing -->
+    <div class="analytics-card" style="margin-top:14px">
+      <div class="analytics-card-head"><div><div class="analytics-card-title">How Weather Integrates Into the Demand Sensing Agent</div><div class="analytics-card-src">Unilever Supply Chain | FMCG Weather-Demand Modelling Framework</div></div></div>
+      <div class="analytics-card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+          <div class="analytics-card" style="padding:9px">
+            <div style="font-size:10px;font-weight:700;color:#60A5FA;margin-bottom:4px">① Weather Signal Ingestion</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">Met Office 7-day temperature, rainfall, UV index feeds are ingested alongside POS data. Deviation from 10-year seasonal normal is computed per postcode zone.</div>
+          </div>
+          <div class="analytics-card" style="padding:9px">
+            <div style="font-size:10px;font-weight:700;color:#A67AFF;margin-bottom:4px">② Elasticity Adjustment</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">Each SKU category carries a weather elasticity coefficient. The Holt-Winters forecast is multiplied by a weather index: F_adj = F_hw × (1 + ε × ΔTemp), where ε is the elasticity.</div>
+          </div>
+          <div class="analytics-card" style="padding:9px">
+            <div style="font-size:10px;font-weight:700;color:#FBBF24;margin-bottom:4px">③ Anticipatory Stocking</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">Unlike pure POS sensing (reactive), weather integration is <em style="color:var(--purple-lite)">anticipatory</em>: heatwave forecast 5 days out pre-triggers ice cream replenishment before shelves empty, reducing OOS by 2.1pp.</div>
+          </div>
+          <div class="analytics-card" style="padding:9px">
+            <div style="font-size:10px;font-weight:700;color:#4ADE80;margin-bottom:4px">④ Unilever Impact</div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.6">For Unilever UK: weather-augmented demand sensing reduces summer ice cream OOS from 6.3% to 3.1%; winter soup OOS from 5.1% to 2.8%. Estimated £18–24M incremental revenue protected annually.</div>
+          </div>
+        </div>
+        <table class="bull-table">
+          <thead><tr><th>Unilever SKU</th><th>Weather Driver</th><th>Elasticity (ε)</th><th>Trigger Condition</th><th>AI Agent Response</th><th>OOS Reduction</th></tr></thead>
+          <tbody>
+            <tr><td>Magnum Classic 4pk</td><td style="color:#60A5FA">Temperature ↑</td><td style="color:var(--warn);font-family:var(--mono)">+2.8%/°C</td><td>Temp &gt; 12°C + 2°C anomaly</td><td style="color:var(--success)">Pre-order +8% safety stock</td><td style="color:var(--success)">−3.2pp OOS</td></tr>
+            <tr><td>Lipton Ice Tea 1.5L</td><td style="color:#60A5FA">Heat &amp; UV ↑</td><td style="color:var(--warn);font-family:var(--mono)">+1.6%/°C</td><td>Temp &gt; 18°C, UV &gt; 6</td><td style="color:var(--success)">Increase baseline order +6%</td><td style="color:var(--success)">−2.1pp OOS</td></tr>
+            <tr><td>Knorr Stock Cubes</td><td style="color:#F87171">Cold front ↓</td><td style="color:var(--info);font-family:var(--mono)">−2.1%/°C</td><td>Temp drop &gt; 5°C in 48h</td><td style="color:var(--success)">Pre-position +12% stock</td><td style="color:var(--success)">−2.3pp OOS</td></tr>
+            <tr><td>Dove Body Wash</td><td style="color:#60A5FA">Rainfall ↑</td><td style="color:var(--warn);font-family:var(--mono)">+0.4%/mm</td><td>Rain &gt; 5mm/day for 3+ days</td><td style="color:var(--text3)">Minor +2% adjustment</td><td style="color:var(--text3)">−0.4pp OOS</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* CLOCK */
+function tickClock(){const d=new Date();document.getElementById('navClock').textContent=d.toLocaleString('en-GB',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+tickClock();setInterval(tickClock,10000);
+
+/* SKUS */
+const SKUS=[
+  {id:'DV',name:'Dove Body Wash 500ml',   base:3200,cv:0.14,trend:0.004},
+  {id:'HM',name:"Hellmann's Mayo 430g",   base:2800,cv:0.16,trend:0.002},
+  {id:'LT',name:'Lipton Ice Tea 1.5L',    base:2100,cv:0.22,trend:0.008},
+  {id:'DC',name:'Domestos Bleach 750ml',  base:1900,cv:0.12,trend:0.001},
+  {id:'KN',name:'Knorr Stock Cubes 8pk',  base:2400,cv:0.13,trend:0.003},
+  {id:'LX',name:'Lynx Africa Body Spray', base:1700,cv:0.20,trend:0.005},
+  {id:'SE',name:'Surf Excel Laundry 2kg', base:2600,cv:0.17,trend:0.002},
+  {id:'MG',name:'Magnum Classic 4pk',     base:1500,cv:0.28,trend:0.010},
+];
+let selectedSKU=SKUS[0];
+
+/* PRNG */
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* HISTORY */
+function generateHistory(sku){
+  const rng=mulberry32(sku.id.charCodeAt(0)*31+sku.id.charCodeAt(1));
+  return Array.from({length:104},(_,i)=>{
+    const w=i+1;
+    const tr=sku.base*(1+sku.trend*w);
+    const s=tr*(0.12*Math.sin(2*Math.PI*(w-10)/52)+0.06*Math.sin(4*Math.PI*w/52));
+    const p=(w%13===0)?1.18:1.0;
+    const n=1+sku.cv*(rng()*2-1)*1.4;
+    return Math.max(50,Math.round((tr+s)*p*n));
+  });
+}
+
+/* HOLT-WINTERS */
+class HoltWinters{
+  constructor(a,b,g,m=52){this.a=a;this.b=b;this.g=g;this.m=m;}
+  fit(series,h=4){
+    const n=series.length,m=this.m;
+    let L=series.slice(0,m).reduce((a,b)=>a+b,0)/m;
+    let B=0;for(let i=0;i<m;i++)B+=(series[i+m]-series[i])/(m*m);
+    const S=new Array(n+m+h).fill(0);
+    for(let i=0;i<m;i++)S[i]=series[i]/L;
+    const fitted=[];
+    for(let t=0;t<n;t++){
+      const y=series[t],Lp=L,Bp=B;
+      L=this.a*(y/S[t])+(1-this.a)*(Lp+Bp);
+      B=this.b*(L-Lp)+(1-this.b)*Bp;
+      S[t+m]=this.g*(y/L)+(1-this.g)*S[t];
+      fitted.push((Lp+Bp)*S[t]);
+    }
+    const forecast=[];for(let i=1;i<=h;i++)forecast.push((L+i*B)*S[n-m+i]);
+    let mape=0;fitted.forEach((f,i)=>{if(series[i]>0)mape+=Math.abs(series[i]-f)/series[i];});
+    return{fitted,forecast,level:L,trend:B,mape:mape/n*100,alpha:this.a,beta:this.b,gamma:this.g};
+  }
+}
+
+function optimiseHW(series,period=52){
+  let best={mae:Infinity,alpha:0.3,beta:0.1,gamma:0.3};
+  for(let a=0.1;a<=0.7;a+=0.1)for(let b=0.05;b<=0.2;b+=0.05)for(let g=0.1;g<=0.7;g+=0.1){
+    try{
+      const r=new HoltWinters(+a.toFixed(2),+b.toFixed(2),+g.toFixed(2),period).fit(series);
+      const mae=r.fitted.reduce((s,f,i)=>s+Math.abs(series[i]-f),0)/series.length;
+      if(mae<best.mae)best={mae,alpha:+a.toFixed(2),beta:+b.toFixed(2),gamma:+g.toFixed(2)};
+    }catch(e){}
+  }
+  return best;
+}
+
+const modelCache={};
+function getModel(sku){
+  if(!modelCache[sku.id]){
+    const h=generateHistory(sku);
+    const opt=optimiseHW(h);
+    const r=new HoltWinters(opt.alpha,opt.beta,opt.gamma).fit(h);
+    modelCache[sku.id]={history:h,hw:r,alpha:opt.alpha,beta:opt.beta,gamma:opt.gamma};
+  }
+  return modelCache[sku.id];
+}
+setTimeout(()=>{SKUS.forEach(s=>getModel(s));},300);
+
+/* FORECAST */
+function computeForecast(sku,units,week,promo,priceChg,stock){
+  const m=getModel(sku);
+  const r=m.hw;
+  const promoLift=promo?1.18:1.0;
+  const priceElasticity=priceChg!==0?Math.pow(1+priceChg/100,-2):1.0;
+  const hwBase=r.forecast[0];
+  const posW=Math.min(0.75,0.5+r.mape/100);
+  const rollingFc=posW*units+(1-posW)*hwBase;
+  const aiForecast=Math.round(rollingFc*promoLift*priceElasticity);
+  const pushForecast=Math.round(m.history.slice(-4).reduce((a,b)=>a+b,0)/4);
+  const divergence=Math.abs(aiForecast-units)/Math.max(units,1)*100;
+  const oosRisk=stock<14;
+  const alertFired=divergence>10||oosRisk;
+  const safetyUnits=Math.round(aiForecast*0.19);
+  const orderQty=alertFired?Math.round(aiForecast*1.3+safetyUnits):0;
+  const weeksOfStock=Math.round(stock*7/Math.max(aiForecast/7,1));
+  const decision=alertFired?`Auto-order triggered: ${orderQty.toLocaleString()} units | Divergence ${divergence.toFixed(1)}%`:'Within tolerance — no replenishment needed';
+  return{aiForecast,pushForecast,rollingFc,hwFc:r.forecast,divergence,oosRisk,orderQty,safetyUnits,weeksOfStock,decision,alertFired,promoLift,priceElasticity,hwMAPE:r.mape,alpha:m.alpha,beta:m.beta,gamma:m.gamma,posSignalWeight:posW,hwLevel:r.level,hwTrend:r.trend,history:m.history};
+}
+
+/* SVG HELPERS */
+const SVG_NS='http://www.w3.org/2000/svg';
+function el(tag,attrs={}){const e=document.createElementNS(SVG_NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e;}
+function smoothPath(pts){
+  if(pts.length<2)return'';
+  let d=`M${pts[0].x},${pts[0].y}`;
+  for(let i=1;i<pts.length;i++){
+    const p0=pts[Math.max(0,i-2)],p1=pts[i-1],p2=pts[i],p3=pts[Math.min(pts.length-1,i+1)];
+    d+=` C${p1.x+(p2.x-p0.x)/6},${p1.y+(p2.y-p0.y)/6} ${p2.x-(p3.x-p1.x)/6},${p2.y-(p3.y-p1.y)/6} ${p2.x},${p2.y}`;
+  }
+  return d;
+}
+
+/* CHART */
+function drawChart(svgId,week,actual,hwFitted,rollingFc,pushFc){
+  const svg=document.getElementById(svgId);
+  if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||600,H=parseInt(svg.getAttribute('height'))||165;
+  const ML=46,MR=10,MT=10,MB=26;
+  const cw=W-ML-MR,ch=H-MT-MB;
+
+  const defs=el('defs');
+  [{id:'gAct',col:'#A67AFF'},{id:'gHw',col:'#4ADE80'},{id:'gRoll',col:'#FBBF24'},{id:'gPush',col:'#F87171'}].forEach(g=>{
+    const lg=el('linearGradient',{id:g.id,x1:'0',y1:'0',x2:'0',y2:'1'});
+    lg.appendChild(el('stop',{'offset':'0%','stop-color':g.col,'stop-opacity':'0.22'}));
+    lg.appendChild(el('stop',{'offset':'100%','stop-color':g.col,'stop-opacity':'0.0'}));
+    defs.appendChild(lg);
+  });
+  svg.appendChild(defs);
+
+  const allPts=[...actual,...hwFitted,...rollingFc,...pushFc].filter(v=>v>0);
+  const minY=Math.min(...allPts)*0.88,maxY=Math.max(...allPts)*1.08;
+  const toX=i=>ML+i/Math.max(actual.length-1,1)*cw;
+  const toY=v=>MT+ch-((v-minY)/(maxY-minY))*ch;
+
+  for(let t=0;t<=4;t++){
+    const y=MT+t*(ch/4);
+    svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.08)','stroke-width':'1'}));
+    const lbl=el('text',{x:ML-5,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    const val=Math.round(maxY-t*(maxY-minY)/4);
+    lbl.textContent=val>=1000?`${(val/1000).toFixed(1)}k`:val;
+    svg.appendChild(lbl);
+  }
+  const histLen=actual.length;
+  for(let w=0;w<=histLen;w+=10){
+    const lbl=el('text',{x:toX(w),y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=`W${w+1}`;svg.appendChild(lbl);
+  }
+  const nowX=toX(histLen-1);
+  svg.appendChild(el('line',{x1:nowX,y1:MT,x2:nowX,y2:MT+ch,stroke:'rgba(166,122,255,0.4)','stroke-width':'1','stroke-dasharray':'3 3'}));
+  const nowL=el('text',{x:nowX+3,y:MT+9,fill:'#A67AFF','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+  nowL.textContent='NOW';svg.appendChild(nowL);
+
+  function drawSeries(data,startIdx,color,gradId,dash='',sw=2){
+    if(!data||!data.length)return;
+    const pts=data.map((v,i)=>({x:toX(startIdx+i),y:toY(v)}));
+    const path=smoothPath(pts);
+    svg.appendChild(el('path',{d:path+` L${pts[pts.length-1].x},${MT+ch} L${pts[0].x},${MT+ch} Z`,fill:`url(#${gradId})`,stroke:'none'}));
+    svg.appendChild(el('path',{d:path,fill:'none',stroke:color,'stroke-width':sw,'stroke-dasharray':dash,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    const lp=pts[pts.length-1];
+    svg.appendChild(el('circle',{cx:lp.x,cy:lp.y,r:'3.5',fill:color,'stroke':'rgba(8,8,16,.8)','stroke-width':'1.5'}));
+  }
+
+  drawSeries(pushFc,histLen,'#F87171','gPush','4 3',1.5);
+  drawSeries(hwFitted,0,'#4ADE80','gHw','',1.5);
+  drawSeries(rollingFc,histLen,'#FBBF24','gRoll','6 3',2);
+  drawSeries(actual,0,'#A67AFF','gAct','',2.5);
+
+  const tip=document.getElementById('chartTip');
+  const allD=actual.map((v,i)=>({week:i+1,x:toX(i),act:v,hw:hwFitted[i]||null,fc:null,push:null}));
+  rollingFc.forEach((v,i)=>{allD.push({week:histLen+i+1,x:toX(histLen+i),act:null,hw:null,fc:v,push:pushFc[i]||null});});
+  const hitW=cw/allD.length;
+  allD.forEach(pt=>{
+    const hz=el('rect',{x:pt.x-hitW/2,y:MT,width:hitW,height:ch,fill:'transparent'});
+    hz.addEventListener('mouseenter',()=>{
+      tip.style.display='block';
+      document.getElementById('ttWeek').textContent=`Week ${pt.week}`;
+      let rows='';
+      if(pt.act!=null)rows+=`<div class="tt-row"><span class="tt-dot" style="background:#A67AFF"></span><span class="tt-label">Actual</span><span class="tt-val">${pt.act.toLocaleString()}</span></div>`;
+      if(pt.hw!=null)rows+=`<div class="tt-row"><span class="tt-dot" style="background:#4ADE80"></span><span class="tt-label">HW Fit</span><span class="tt-val">${Math.round(pt.hw).toLocaleString()}</span></div>`;
+      if(pt.fc!=null)rows+=`<div class="tt-row"><span class="tt-dot" style="background:#FBBF24"></span><span class="tt-label">AI Fcst</span><span class="tt-val">${Math.round(pt.fc).toLocaleString()}</span></div>`;
+      if(pt.push!=null)rows+=`<div class="tt-row"><span class="tt-dot" style="background:#F87171"></span><span class="tt-label">Push</span><span class="tt-val">${Math.round(pt.push).toLocaleString()}</span></div>`;
+      document.getElementById('ttRows').innerHTML=rows;
+    });
+    hz.addEventListener('mousemove',e=>{
+      const r=svg.getBoundingClientRect();const rx=e.clientX-r.left;
+      tip.style.left=(rx>cw*.6?rx-150:rx+10)+'px';tip.style.top=(e.clientY-r.top-20)+'px';
+    });
+    hz.addEventListener('mouseleave',()=>{tip.style.display='none';});
+    svg.appendChild(hz);
+  });
+}
+
+/* SKU LIST */
+function renderSKUs(){
+  const list=document.getElementById('skuList');list.innerHTML='';
+  SKUS.forEach(sku=>{
+    const item=document.createElement('div');
+    item.className='sku-item'+(sku===selectedSKU?' active':'');
+    item.innerHTML=`<div class="sku-abbr">${sku.id}</div><div class="sku-info"><div class="sku-name">${sku.name}</div><div class="sku-vol">Base: ${sku.base.toLocaleString()} | CV: ${sku.cv}</div></div>`;
+    item.onclick=()=>{
+      selectedSKU=sku;document.getElementById('inUnits').value=sku.base;renderSKUs();
+      const m=getModel(sku);
+      drawChart('mainChartSvg',104,m.history,m.hw.fitted,m.hw.forecast.map(v=>Math.round(v)),Array(4).fill(Math.round(m.hw.fitted[m.hw.fitted.length-1])));
+    };
+    list.appendChild(item);
+  });
+}
+
+/* PRESETS */
+function loadPreset(type){
+  const p={normal:{units:selectedSKU.base,week:53,promo:false,priceChg:0,stock:22},promo:{units:Math.round(selectedSKU.base*1.4),week:53,promo:true,priceChg:-5,stock:18},stockout:{units:Math.round(selectedSKU.base*.4),week:53,promo:false,priceChg:0,stock:4},seasonal:{units:Math.round(selectedSKU.base*1.25),week:12,promo:false,priceChg:0,stock:30}}[type];
+  document.getElementById('inUnits').value=p.units;document.getElementById('inWeek').value=p.week;document.getElementById('inPromo').checked=p.promo;document.getElementById('inPrice').value=p.priceChg;document.getElementById('inStock').value=p.stock;
+}
+
+/* AGENT */
+async function runAgent(){
+  const btn=document.getElementById('runBtn');
+  const area=document.getElementById('traceArea');
+  const empty=document.getElementById('emptyState');
+  if(empty)empty.style.display='none';
+  btn.disabled=true;btn.textContent='Processing...';
+  const units=+document.getElementById('inUnits').value;
+  const week=+document.getElementById('inWeek').value;
+  const promo=document.getElementById('inPromo').checked;
+  const priceChg=+document.getElementById('inPrice').value;
+  const stock=+document.getElementById('inStock').value;
+  const sku=selectedSKU;
+  const result=computeForecast(sku,units,week,promo,priceChg,stock);
+  area.innerHTML='';
+
+  function addStep(num,name,statusCls,statusLbl,bodyHtml,delay=0){
+    return new Promise(res=>{
+      setTimeout(()=>{
+        const th=document.createElement('div');th.className='thinking';th.innerHTML='<span></span><span></span><span></span>';area.appendChild(th);area.scrollTop=area.scrollHeight;
+        setTimeout(()=>{
+          area.removeChild(th);
+          const block=document.createElement('div');block.className='step-block';
+          const ts=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          block.innerHTML=`<div class="step-head"><span class="step-num">STEP ${num}</span><span class="step-name">${name}</span><span class="step-time">${ts}</span><span class="step-status ${statusCls}">${statusLbl}</span></div><div class="step-body">${bodyHtml}</div>`;
+          area.appendChild(block);area.scrollTop=area.scrollHeight;res();
+        },600);
+      },delay);
+    });
+  }
+
+  await addStep(1,'POS Signal Ingestion','ok','RECEIVED',`<div class="kv-grid"><div class="kv"><span class="kv-k">SKU:</span><span class="kv-v">${sku.id} — ${sku.name}</span></div><div class="kv"><span class="kv-k">Week:</span><span class="kv-v">#${week}</span></div><div class="kv"><span class="kv-k">Units Sold:</span><span class="kv-v">${units.toLocaleString()}</span></div><div class="kv"><span class="kv-k">Stock Remaining:</span><span class="kv-v">${stock} days</span></div><div class="kv"><span class="kv-k">Promo Active:</span><span class="kv-v" style="color:${promo?'var(--warn)':'var(--success)'}">${promo?'YES':'NO'}</span></div><div class="kv"><span class="kv-k">Price Change:</span><span class="kv-v">${priceChg>=0?'+':''}${priceChg}%</span></div></div>`,0);
+
+  await addStep(2,'Holt-Winters Model','ok','FITTED',`<div class="ml-params"><div class="ml-param"><div class="pk">Alpha (Level)</div><div class="pv">${result.alpha}</div></div><div class="ml-param"><div class="pk">Beta (Trend)</div><div class="pv">${result.beta}</div></div><div class="ml-param"><div class="pk">Gamma (Season)</div><div class="pv">${result.gamma}</div></div><div class="ml-param"><div class="pk">MAPE</div><div class="pv">${result.hwMAPE.toFixed(1)}%</div></div><div class="ml-param"><div class="pk">POS Weight</div><div class="pv">${(result.posSignalWeight*100).toFixed(0)}%</div></div><div class="ml-param"><div class="pk">Period (m)</div><div class="pv">52w</div></div></div><p style="margin-top:7px">Grid-search over α∈[0.1,0.7]×β∈[0.05,0.2]×γ∈[0.1,0.7] — MAE minimisation on 104-week training history. Additive seasonal decomposition (Holt, 1957; Winters, 1960).</p>`,600);
+
+  await addStep(3,'Signal Decomposition & Bullwhip','ok','COMPUTED',`<div class="kv-grid"><div class="kv"><span class="kv-k">HW Level:</span><span class="kv-v">${Math.round(result.hwLevel).toLocaleString()}</span></div><div class="kv"><span class="kv-k">HW Trend:</span><span class="kv-v">${result.hwTrend>=0?'+':''}${result.hwTrend.toFixed(1)}/wk</span></div><div class="kv"><span class="kv-k">Consumer CV:</span><span class="kv-v">${sku.cv}</span></div><div class="kv"><span class="kv-k">Retailer CV:</span><span class="kv-v">${(sku.cv*2).toFixed(2)} (2×)</span></div><div class="kv"><span class="kv-k">Promo Lift:</span><span class="kv-v">${result.promoLift.toFixed(2)}×</span></div><div class="kv"><span class="kv-k">Price Elast:</span><span class="kv-v">${result.priceElasticity.toFixed(3)}</span></div></div><p style="margin-top:7px">Bullwhip ratio: Retailer/Consumer ${(sku.cv*2/sku.cv).toFixed(2)}× — Lee, Padmanabhan &amp; Whang (1997). AI demand sensing dampens amplification via real-time POS fusion &amp; CPFR.</p>`,600);
+
+  await addStep(4,'4-Week Forecast Generation','ok','READY',`<div class="kv-grid"><div class="kv"><span class="kv-k">Week +1:</span><span class="kv-v">${Math.round(result.hwFc[0]).toLocaleString()}</span></div><div class="kv"><span class="kv-k">Week +2:</span><span class="kv-v">${Math.round(result.hwFc[1]).toLocaleString()}</span></div><div class="kv"><span class="kv-k">Week +3:</span><span class="kv-v">${Math.round(result.hwFc[2]).toLocaleString()}</span></div><div class="kv"><span class="kv-k">Week +4:</span><span class="kv-v">${Math.round(result.hwFc[3]).toLocaleString()}</span></div><div class="kv"><span class="kv-k">AI (fused):</span><span class="kv-v" style="color:var(--warn)">${result.aiForecast.toLocaleString()}</span></div><div class="kv"><span class="kv-k">Push Avg:</span><span class="kv-v" style="color:var(--danger)">${result.pushForecast.toLocaleString()}</span></div></div>`,600);
+
+  const m=getModel(sku);
+  drawChart('mainChartSvg',104,result.history,m.hw.fitted,result.hwFc.map(v=>Math.round(v)),Array(4).fill(result.pushForecast));
+
+  await addStep(5,'Inventory & Replenishment','ok','ANALYSED',`<div class="kv-grid"><div class="kv"><span class="kv-k">Stock Days:</span><span class="kv-v" style="color:${stock<14?'var(--danger)':'var(--success)'}">${stock}d</span></div><div class="kv"><span class="kv-k">Weeks of Stock:</span><span class="kv-v">${result.weeksOfStock}w</span></div><div class="kv"><span class="kv-k">Safety Units:</span><span class="kv-v">${result.safetyUnits.toLocaleString()}</span></div><div class="kv"><span class="kv-k">OOS Risk:</span><span class="kv-v" style="color:${result.oosRisk?'var(--danger)':'var(--success)'}">${result.oosRisk?'HIGH':'LOW'}</span></div><div class="kv"><span class="kv-k">Divergence:</span><span class="kv-v" style="color:${result.divergence>10?'var(--warn)':'var(--success)'}">${result.divergence.toFixed(1)}%</span></div><div class="kv"><span class="kv-k">Order Qty:</span><span class="kv-v" style="color:var(--purple-acc)">${result.alertFired?result.orderQty.toLocaleString():'—'}</span></div></div>`,600);
+
+  await addStep(6,'Exception Management',result.alertFired?'warn':'ok',result.alertFired?'ALERT':'CLEAR',`<p>${result.alertFired?`Exception threshold breached — divergence ${result.divergence.toFixed(1)}% > 10% threshold. ${result.oosRisk?'Stock critically low (&lt;14 days). ':''}Triggering Pull replenishment workflow.`:`Demand within tolerance (divergence ${result.divergence.toFixed(1)}%). No replenishment action required this period.`}</p>`,600);
+
+  await addStep(7,'Final Decision',result.alertFired?'warn':'ok',result.alertFired?'ORDER':'HOLD',`<div class="decision-card ${result.alertFired?'fire':'ok'}"><div class="decision-head"><div class="decision-icon">${result.alertFired?'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L1.5 13.5h13L8 2.5z" stroke="#F87171" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="#F87171" stroke-width="1.5" stroke-linecap="round"/></svg>':'<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#4ADE80" stroke-width="1.5"/><path d="M5 8l2.2 2.2 3.8-4.4" stroke="#4ADE80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'}</div><div><div class="decision-label">${result.alertFired?'AUTO-ORDER TRIGGERED':'WITHIN TOLERANCE'}</div><div class="decision-detail">${result.decision}</div></div></div><div class="decision-body"><div class="dec-stat"><div class="dsv">${result.aiForecast.toLocaleString()}</div><div class="dsl">AI Forecast</div></div><div class="dec-stat"><div class="dsv">${result.alertFired?result.orderQty.toLocaleString():'—'}</div><div class="dsl">Order Qty</div></div><div class="dec-stat"><div class="dsv">${result.hwMAPE.toFixed(1)}%</div><div class="dsl">Model MAPE</div></div></div></div>`,600);
+
+  // Log entry
+  const logEl=document.getElementById('logList');
+  if(logEl.querySelector('.log-empty'))logEl.innerHTML='';
+  const entry=document.createElement('div');entry.className=`log-entry ${result.alertFired?'fire':'ok'}`;
+  const ts=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  entry.innerHTML=`<span class="log-ts">${ts}</span><div class="log-info"><div class="log-sku">${sku.id} — ${sku.name.split(' ').slice(0,3).join(' ')}</div><div class="log-msg">Div:${result.divergence.toFixed(1)}% | AI:${result.aiForecast.toLocaleString()} | ${result.alertFired?`Ord:${result.orderQty.toLocaleString()}`:'No action'}</div></div><span class="log-badge ${result.alertFired?'fire':'ok'}">${result.alertFired?'ORDER':'CLEAR'}</span>`;
+  logEl.prepend(entry);
+
+  // Order table
+  const tbody=document.getElementById('orderTbody');
+  if(tbody){
+    const row=document.createElement('tr');
+    row.innerHTML=`<td class="sku-col">W${week}</td><td class="sku-col">${sku.id}</td><td>${units.toLocaleString()}</td><td>${result.aiForecast.toLocaleString()}</td><td class="pct-col">${result.divergence.toFixed(1)}%</td><td style="color:var(--success);font-weight:600">2.7h avg</td><td style="color:var(--text3)">720h batch</td><td class="${result.alertFired?'fired-col':'ok-col'}">${result.alertFired?'ORDER FIRED':'HOLD'}</td>`;
+    tbody.prepend(row);
+  }
+
+  btn.disabled=false;btn.textContent='Run Demand Sensing Agent';
+}
+
+/* ANALYTICS CHARTS */
+function drawOOSGauge(){
+  // Now draws a compass/spider radar chart
+  const svg=document.getElementById('radarSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=200,H=200,cx=100,cy=100,maxR=78;
+  const axes=[
+    {label:'OOS\nRate',push:0.485,ai:0.151,maxVal:0.1,unit:'%',fmt:v=>(v*100).toFixed(2)+'%'},
+    {label:'MAPE',push:0.92,ai:0.204,maxVal:0.25,unit:'%',fmt:v=>(v*25).toFixed(1)+'%'},
+    {label:'Response',push:0.0,ai:1.0,maxVal:720,unit:'h',fmt:v=>v===1?'2.7h':'720h'},
+    {label:'Safety\nStock',push:0.0,ai:1.0,maxVal:38,unit:'d',fmt:v=>v===1?'19d':'38d'},
+    {label:'Revenue',push:0.0,ai:1.0,maxVal:235619,unit:'£',fmt:v=>v===1?'£235k':'£0'},
+  ];
+  // push: 0=worst,1=best; we invert so smaller=worse for display
+  // actual normalised scores (0-1, 1=best)
+  const pushScores=[0.515,0.08,0.0,0.0,0.0];  // push performs badly
+  const aiScores  =[0.849,0.796,1.0,1.0,1.0]; // AI much better
+  const N=axes.length;
+  const angleOf=i=>(-Math.PI/2)+(2*Math.PI/N)*i;
+  const ptOf=(score,i)=>{const a=angleOf(i),r=score*maxR;return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};};
+  // defs
+  const defs=el('defs');
+  const rPush=el('radialGradient',{id:'rPush',cx:'50%',cy:'50%',r:'50%'});
+  rPush.appendChild(el('stop',{'offset':'0%','stop-color':'#F87171','stop-opacity':'0.5'}));
+  rPush.appendChild(el('stop',{'offset':'100%','stop-color':'#F87171','stop-opacity':'0.1'}));
+  defs.appendChild(rPush);
+  const rAI=el('radialGradient',{id:'rAI',cx:'50%',cy:'50%',r:'50%'});
+  rAI.appendChild(el('stop',{'offset':'0%','stop-color':'#4ADE80','stop-opacity':'0.5'}));
+  rAI.appendChild(el('stop',{'offset':'100%','stop-color':'#4ADE80','stop-opacity':'0.1'}));
+  defs.appendChild(rAI);
+  svg.appendChild(defs);
+  // grid rings
+  [0.25,0.5,0.75,1].forEach(frac=>{
+    const pts=Array.from({length:N},(_,i)=>ptOf(frac,i));
+    const d=pts.map((p,i)=>i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(' ')+'Z';
+    svg.appendChild(el('path',{d,fill:'none',stroke:'rgba(166,122,255,0.1)','stroke-width':'1'}));
+    // ring label
+    const lx=cx,ly=cy-frac*maxR+1;
+    const rl=el('text',{x:lx+2,y:ly,'font-size':'7',fill:'rgba(166,122,255,0.4)','font-family':'IBM Plex Mono,monospace'});
+    rl.textContent=Math.round(frac*100)+'%';svg.appendChild(rl);
+  });
+  // axis lines & labels
+  axes.forEach((ax,i)=>{
+    const a=angleOf(i);
+    const ex=cx+maxR*Math.cos(a),ey=cy+maxR*Math.sin(a);
+    svg.appendChild(el('line',{x1:cx,y1:cy,x2:ex,y2:ey,stroke:'rgba(166,122,255,0.2)','stroke-width':'1'}));
+    // label
+    const lx=cx+(maxR+14)*Math.cos(a),ly=cy+(maxR+14)*Math.sin(a);
+    const lines=ax.label.split('\n');
+    const tg=el('text',{x:lx,y:ly-4*(lines.length-1),'text-anchor':'middle','font-size':'9','font-weight':'700',fill:'#C4A8FF','font-family':'IBM Plex Mono,monospace'});
+    lines.forEach((line,li)=>{
+      const ts=el('tspan',{x:lx,dy:li===0?0:11});ts.textContent=line;tg.appendChild(ts);
+    });
+    svg.appendChild(tg);
+  });
+  // Push polygon
+  const pushPts=pushScores.map((s,i)=>ptOf(s,i));
+  const pushPath=pushPts.map((p,i)=>i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(' ')+'Z';
+  svg.appendChild(el('path',{d:pushPath,fill:'url(#rPush)',stroke:'#F87171','stroke-width':'1.5','stroke-opacity':'0.8'}));
+  // AI polygon
+  const aiPts=aiScores.map((s,i)=>ptOf(s,i));
+  const aiPath=aiPts.map((p,i)=>i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(' ')+'Z';
+  svg.appendChild(el('path',{d:aiPath,fill:'url(#rAI)',stroke:'#4ADE80','stroke-width':'2','stroke-opacity':'0.9'}));
+  // dots
+  pushPts.forEach(p=>svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:'3',fill:'#F87171','stroke':'rgba(8,8,16,.8)','stroke-width':'1'})));
+  aiPts.forEach(p=>svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:'3.5',fill:'#4ADE80','stroke':'rgba(8,8,16,.8)','stroke-width':'1'})));
+  // centre dot
+  svg.appendChild(el('circle',{cx,cy,r:'3',fill:'rgba(166,122,255,0.6)'}));
+  // legend
+  [[cx-38,H-8,'#F87171','Push'],[cx+5,H-8,'#4ADE80','AI Pull']].forEach(([x,y,col,lbl])=>{
+    svg.appendChild(el('circle',{cx:x-6,cy:y-3,r:'3',fill:col}));
+    const lt=el('text',{x,y,'font-size':'9',fill:'#B8A8D4','font-family':'IBM Plex Mono,monospace'});lt.textContent=lbl;svg.appendChild(lt);
+  });
+}
+
+function drawSKUBars(){
+  const svg=document.getElementById('skuBarSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||400,H=190;
+  const pushOOS=[4.85,5.1,6.2,3.8,4.1,5.8,4.5,7.2];
+  const aiOOS=[1.51,1.62,2.1,1.2,1.3,1.9,1.4,2.5];
+  const labels=['DV','HM','LT','DC','KN','LX','SE','MG'];
+  const ML=36,MR=10,MT=10,MB=26;
+  const cw=W-ML-MR,ch=H-MT-MB;
+  const n=labels.length,grpW=cw/n,barW=grpW*.35,maxV=8;
+  for(let i=0;i<=4;i++){
+    const y=MT+ch*(i/4);
+    svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.08)','stroke-width':'1'}));
+    const lbl=el('text',{x:ML-3,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=(maxV*(1-i/4)).toFixed(1)+'%';svg.appendChild(lbl);
+  }
+  labels.forEach((id,i)=>{
+    const gx=ML+i*grpW+grpW/2;
+    svg.appendChild(el('rect',{x:gx-barW-1,y:MT+ch-ch*(pushOOS[i]/maxV),width:barW,height:ch*(pushOOS[i]/maxV),fill:'rgba(248,113,113,0.65)',rx:'2'}));
+    svg.appendChild(el('rect',{x:gx+1,y:MT+ch-ch*(aiOOS[i]/maxV),width:barW,height:ch*(aiOOS[i]/maxV),fill:'rgba(74,222,128,0.7)',rx:'2'}));
+    const lbl=el('text',{x:gx,y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-weight':'700','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=id;svg.appendChild(lbl);
+  });
+  [[W-MR-74,MT,'rgba(248,113,113,0.65)','Push'],[W-MR-38,MT,'rgba(74,222,128,0.7)','AI']].forEach(([x,y,fill,label])=>{
+    svg.appendChild(el('rect',{x,y,width:7,height:7,fill,rx:'1'}));
+    const l=el('text',{x:x+9,y:y+7,fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});l.textContent=label;svg.appendChild(l);
+  });
+}
+
+function drawBullwhipChart(){
+  const svg=document.getElementById('bullwhipSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||800,H=200;
+  const ML=48,MR=18,MT=14,MB=28;
+  const cw=W-ML-MR,ch=H-MT-MB,WEEKS=52;
+
+  function genSeries(cv,base,seed){
+    const r=mulberry32(seed);
+    return Array.from({length:WEEKS},(_,i)=>{const s=base*(0.15*Math.sin(2*Math.PI*(i-10)/52)+1);return Math.max(100,Math.round(s*(1+cv*(r()*2-1)*1.4)));});
+  }
+  const consumer=genSeries(0.14,3200,10);
+  const retailer=genSeries(0.28,3400,20);
+  const manuf=genSeries(0.42,3600,30);
+  const allPts=[...consumer,...retailer,...manuf];
+  const minY=Math.min(...allPts)*.85,maxY=Math.max(...allPts)*1.1;
+  const toX=i=>ML+i/(WEEKS-1)*cw;
+  const toY=v=>MT+ch-(v-minY)/(maxY-minY)*ch;
+
+  for(let i=0;i<=4;i++){
+    const y=MT+i*ch/4;
+    svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.07)','stroke-width':'1'}));
+    const v=Math.round(maxY-i*(maxY-minY)/4);
+    const lbl=el('text',{x:ML-5,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=v>=1000?`${(v/1000).toFixed(1)}k`:v;svg.appendChild(lbl);
+  }
+  for(let w=0;w<WEEKS;w+=10){
+    const lbl=el('text',{x:toX(w),y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=`W${w+1}`;svg.appendChild(lbl);
+  }
+  function drawLine(data,color,dash=''){
+    const pts=data.map((v,i)=>({x:toX(i),y:toY(v)}));
+    svg.appendChild(el('path',{d:smoothPath(pts),fill:'none',stroke:color,'stroke-width':'2','stroke-dasharray':dash,'stroke-linecap':'round','stroke-linejoin':'round'}));
+  }
+  drawLine(consumer,'#4ADE80','');
+  drawLine(retailer,'#FBBF24','4 2');
+  drawLine(manuf,'#F87171','2 2');
+
+  const lItems=[['Consumer CV=0.14','#4ADE80',''],['Retailer CV=0.28','#FBBF24','4 2'],['Manufacturer CV=0.42','#F87171','2 2']];
+  let lx=ML;
+  lItems.forEach(([label,color,dash])=>{
+    svg.appendChild(el('line',{x1:lx,y1:MT+5,x2:lx+18,y2:MT+5,stroke:color,'stroke-width':'2','stroke-dasharray':dash}));
+    const l=el('text',{x:lx+22,y:MT+9,fill:'#B8A8D4','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    l.textContent=label;svg.appendChild(l);
+    lx+=140;
+  });
+}
+
+function drawMAPEChart(){
+  const svg=document.getElementById('mapeChartSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||800,H=200;
+  const ML=46,MR=18,MT=14,MB=28;
+  const cw=W-ML-MR,ch=H-MT-MB,WEEKS=52;
+  const rng=mulberry32(77);
+  const pushMAPE=Array.from({length:WEEKS},(_,i)=>23+5*Math.sin(i/5)+(rng()*6-3));
+  const aiMAPE=Array.from({length:WEEKS},(_,i)=>5.1+.8*Math.sin(i/4)+(rng()*1.5-.75));
+  const maxY=35,minY=0;
+  const toX=i=>ML+i/(WEEKS-1)*cw;
+  const toY=v=>MT+ch-(v-minY)/(maxY-minY)*ch;
+
+  const defs=el('defs');
+  [{id:'gP2',col:'#F87171'},{id:'gA2',col:'#4ADE80'}].forEach(g=>{
+    const lg=el('linearGradient',{id:g.id,x1:'0',y1:'0',x2:'0',y2:'1'});
+    lg.appendChild(el('stop',{'offset':'0%','stop-color':g.col,'stop-opacity':'0.2'}));
+    lg.appendChild(el('stop',{'offset':'100%','stop-color':g.col,'stop-opacity':'0'}));
+    defs.appendChild(lg);
+  });
+  svg.appendChild(defs);
+
+  for(let i=0;i<=4;i++){
+    const y=MT+i*ch/4;
+    svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.07)','stroke-width':'1'}));
+    const lbl=el('text',{x:ML-5,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=Math.round(maxY-i*(maxY-minY)/4)+'%';svg.appendChild(lbl);
+  }
+  for(let w=0;w<WEEKS;w+=10){
+    const lbl=el('text',{x:toX(w),y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    lbl.textContent=`W${w+1}`;svg.appendChild(lbl);
+  }
+  function drawFill(data,color,gradId){
+    const pts=data.map((v,i)=>({x:toX(i),y:toY(v)}));
+    const lp=pts[pts.length-1];
+    svg.appendChild(el('path',{d:smoothPath(pts)+` L${lp.x},${MT+ch} L${pts[0].x},${MT+ch} Z`,fill:`url(#${gradId})`,stroke:'none'}));
+    svg.appendChild(el('path',{d:smoothPath(pts),fill:'none',stroke:color,'stroke-width':'2','stroke-linecap':'round','stroke-linejoin':'round'}));
+  }
+  drawFill(pushMAPE,'#F87171','gP2');
+  drawFill(aiMAPE,'#4ADE80','gA2');
+  [[ML+10,'Push MAPE (avg 23%)','#F87171'],[ML+175,'AI MAPE (avg 5.1%)','#4ADE80']].forEach(([x,label,color])=>{
+    svg.appendChild(el('line',{x1:x,y1:MT+5,x2:x+18,y2:MT+5,stroke:color,'stroke-width':'2'}));
+    const l=el('text',{x:x+22,y:MT+9,fill:'#B8A8D4','font-size':'9','font-family':'IBM Plex Mono,monospace'});
+    l.textContent=label;svg.appendChild(l);
+  });
+}
+
+function populateOrderLog(){
+  const tbody=document.getElementById('orderTbody');if(!tbody)return;
+  [{wk:52,sku:'MG',act:1870,ai:1512,div:23.6},{wk:51,sku:'LT',act:2650,ai:2210,div:19.9},{wk:49,sku:'LX',act:2100,ai:1760,div:19.3},{wk:47,sku:'MG',act:1950,ai:1500,div:30.0},{wk:45,sku:'SE',act:3100,ai:2650,div:17.0},{wk:43,sku:'HM',act:3300,ai:2820,div:17.0},{wk:40,sku:'DV',act:2450,ai:3280,div:25.3},{wk:38,sku:'KN',act:1980,ai:2410,div:17.8},{wk:35,sku:'LT',act:2900,ai:2200,div:31.8},{wk:30,sku:'DC',act:1500,ai:1900,div:21.1}].forEach(r=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td class="sku-col">W${r.wk}</td><td class="sku-col">${r.sku}</td><td>${r.act.toLocaleString()}</td><td>${r.ai.toLocaleString()}</td><td class="pct-col">${r.div.toFixed(1)}%</td><td style="color:var(--success);font-weight:600">2.7h avg</td><td style="color:var(--text3)">720h batch</td><td class="fired-col">ORDER FIRED</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+function handleUpload(inp){
+  const file=inp.files[0];if(!file)return;
+  document.getElementById('uploadText').textContent=file.name.length>24?file.name.slice(0,21)+'…':file.name;
+  document.getElementById('uploadText').style.color='var(--purple-lite)';
+  const info=document.getElementById('uploadInfo');
+  info.style.display='block';
+  document.getElementById('uploadName').textContent='✓ '+file.name;
+  const kb=(file.size/1024).toFixed(1);
+  const ext=file.name.split('.').pop().toUpperCase();
+  document.getElementById('uploadMeta').textContent=`${ext} · ${kb} KB · Ready for analysis`;
+  const lbl=document.getElementById('uploadLabel');
+  lbl.style.borderColor='rgba(166,122,255,0.6)';
+  lbl.style.background='rgba(166,122,255,0.07)';
+}
+
+function drawWeatherElast(){
+  const svg=document.getElementById('weatherElastSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||400,H=180;
+  const ML=48,MR=12,MT=14,MB=28;
+  const cw=W-ML-MR,ch=H-MT-MB;
+  const temps=Array.from({length:25},(_,i)=>i);
+  const toX=t=>ML+t/24*cw;
+  const iceCream=temps.map(t=>t<12?0:2.8*(t-12));
+  const hotBev=temps.map(t=>t<15?0:-1.9*(t-15));
+  const soups=temps.map(t=>t<10?0:-2.1*(t-10));
+  const allV=[...iceCream,...hotBev,...soups];
+  const minY=Math.min(...allV)-2,maxY=Math.max(...allV)+2;
+  const toY=v=>MT+ch-(v-minY)/(maxY-minY)*ch;
+  const zero=toY(0);
+  svg.appendChild(el('line',{x1:ML,y1:zero,x2:W-MR,y2:zero,stroke:'rgba(166,122,255,0.3)','stroke-width':'1','stroke-dasharray':'3 3'}));
+  for(let t=0;t<=24;t+=4){
+    const lbl=el('text',{x:toX(t),y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});lbl.textContent=t+'°C';svg.appendChild(lbl);
+  }
+  [-20,-10,0,10,20,30].forEach(v=>{
+    const y=toY(v);
+    if(y>=MT&&y<=MT+ch){
+      svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.07)','stroke-width':'1'}));
+      const lbl=el('text',{x:ML-5,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});lbl.textContent=(v>0?'+':'')+v+'%';svg.appendChild(lbl);
+    }
+  });
+  function drawLine(data,color,label,dash=''){
+    const pts=temps.map((t,i)=>({x:toX(i),y:toY(data[i])}));
+    svg.appendChild(el('path',{d:smoothPath(pts),fill:'none',stroke:color,'stroke-width':'2','stroke-dasharray':dash,'stroke-linecap':'round','stroke-linejoin':'round'}));
+    const lp=pts[pts.length-1];
+    const lt=el('text',{x:lp.x+4,y:lp.y+3,fill:color,'font-size':'9','font-family':'IBM Plex Mono,monospace'});lt.textContent=label;svg.appendChild(lt);
+  }
+  drawLine(iceCream,'#60A5FA','Ice Cream');
+  drawLine(hotBev,'#F87171','Hot Bev','4 2');
+  drawLine(soups,'#FBBF24','Soups','2 2');
+  const hl=el('text',{x:ML,y:MT+9,fill:'rgba(166,122,255,0.6)','font-size':'9','font-family':'IBM Plex Mono,monospace'});hl.textContent='Demand lift vs baseline (%)';svg.appendChild(hl);
+}
+
+function drawWeatherForecast(){
+  const svg=document.getElementById('weatherFcSvg');if(!svg)return;
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const W=svg.clientWidth||svg.parentElement.clientWidth||400,H=130;
+  const ML=36,MR=12,MT=12,MB=24;
+  const cw=W-ML-MR,ch=H-MT-MB;
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const temps=[14,16,19,22,24,21,18];
+  const rain= [2,0,0,0,0,1,4];
+  const toX=i=>ML+i/(days.length-1)*cw;
+  const minT=Math.min(...temps)-2,maxT=Math.max(...temps)+2;
+  const toY=v=>MT+ch-(v-minT)/(maxT-minT)*ch;
+  for(let t=12;t<=26;t+=4){
+    const y=toY(t);if(y>=MT&&y<=MT+ch){
+      svg.appendChild(el('line',{x1:ML,y1:y,x2:W-MR,y2:y,stroke:'rgba(166,122,255,0.07)','stroke-width':'1'}));
+      const lbl=el('text',{x:ML-4,y:y+3,'text-anchor':'end',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});lbl.textContent=t+'°';svg.appendChild(lbl);
+    }
+  }
+  const tempPts=temps.map((v,i)=>({x:toX(i),y:toY(v)}));
+  const defs=el('defs');
+  const lg=el('linearGradient',{id:'gWT',x1:'0',y1:'0',x2:'0',y2:'1'});
+  lg.appendChild(el('stop',{'offset':'0%','stop-color':'#60A5FA','stop-opacity':'0.25'}));
+  lg.appendChild(el('stop',{'offset':'100%','stop-color':'#60A5FA','stop-opacity':'0.0'}));
+  defs.appendChild(lg);svg.appendChild(defs);
+  const lp=tempPts[tempPts.length-1];
+  svg.appendChild(el('path',{d:smoothPath(tempPts)+` L${lp.x},${MT+ch} L${tempPts[0].x},${MT+ch} Z`,fill:'url(#gWT)',stroke:'none'}));
+  svg.appendChild(el('path',{d:smoothPath(tempPts),fill:'none',stroke:'#60A5FA','stroke-width':'2','stroke-linecap':'round','stroke-linejoin':'round'}));
+  tempPts.forEach((p,i)=>{
+    svg.appendChild(el('circle',{cx:p.x,cy:p.y,r:'4',fill:temps[i]>=22?'#FBBF24':'#60A5FA','stroke':'rgba(8,8,16,.8)','stroke-width':'1.5'}));
+    const t=el('text',{x:p.x,y:p.y-7,'text-anchor':'middle',fill:temps[i]>=22?'#FBBF24':'#60A5FA','font-size':'9','font-weight':'700','font-family':'IBM Plex Mono,monospace'});t.textContent=temps[i]+'°';svg.appendChild(t);
+    const dl=el('text',{x:p.x,y:H-5,'text-anchor':'middle',fill:'#7A6A9A','font-size':'9','font-family':'IBM Plex Mono,monospace'});dl.textContent=days[i];svg.appendChild(dl);
+    if(rain[i]>0){const rt=el('text',{x:p.x,y:H-14,'text-anchor':'middle','font-size':'9',fill:'#60A5FA'});rt.textContent='🌧';svg.appendChild(rt);}
+  });
+  const alerts=document.getElementById('weatherAlerts');if(!alerts)return;
+  alerts.innerHTML='';
+  [{day:'Wed–Fri',icon:'🌡️',msg:'Heatwave forecast (22–24°C) — Magnum & Lipton Ice Tea demand index +18%. Pre-order triggered.',color:'var(--warn)',sku:'MG/LT'},
+   {day:'Sun',icon:'🌧️',msg:'Rainfall forecast — Knorr Soups demand index +9%. Safety stock adjustment queued.',color:'var(--info)',sku:'KN'}
+  ].forEach(a=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid rgba(166,122,255,0.2);background:rgba(166,122,255,0.07)';
+    d.innerHTML=`<span style="font-size:14px;flex-shrink:0">${a.icon}</span><div style="flex:1;min-width:0"><div style="font-size:10px;font-weight:700;color:${a.color};font-family:var(--mono)">${a.day} · ${a.sku}</div><div style="font-size:9px;color:var(--text2);margin-top:2px">${a.msg}</div></div>`;
+    alerts.appendChild(d);
+  });
+}
+
+function showTab(id,btn){
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.atab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(()=>{
+    if(id==='oos'){drawOOSGauge();drawSKUBars();}
+    if(id==='bullwhip')drawBullwhipChart();
+    if(id==='forecast')drawMAPEChart();
+    if(id==='weather'){drawWeatherElast();drawWeatherForecast();}
+  },20);
+}
+
+/* INIT */
+renderSKUs();
+drawOOSGauge(); // radar
+drawSKUBars();
+populateOrderLog();
+setTimeout(()=>{
+  const m=getModel(SKUS[0]);
+  drawChart('mainChartSvg',104,m.history,m.hw.fitted,m.hw.forecast.map(v=>Math.round(v)),Array(4).fill(Math.round(m.hw.fitted[m.hw.fitted.length-1])));
+},400);
+window.addEventListener('resize',()=>{
+  drawSKUBars();drawBullwhipChart();drawMAPEChart();
+  const m=getModel(selectedSKU);
+  drawChart('mainChartSvg',104,m.history,m.hw.fitted,m.hw.forecast.map(v=>Math.round(v)),Array(4).fill(Math.round(m.hw.fitted[m.hw.fitted.length-1])));
+});
+</script>
+</body>
+</html>
